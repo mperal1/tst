@@ -192,6 +192,68 @@
     </div>
 
     <script>
+        function updateRowSeparators(elementId, isTextarea = true) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const text = isTextarea ? element.value : element.textContent;
+            if (!text.trim()) {
+                element.style.backgroundImage = 'none';
+                return;
+            }
+            
+            const lines = text.split('\n');
+            const computedStyle = window.getComputedStyle(element);
+            const paddingTop = parseFloat(computedStyle.paddingTop);
+            const lineHeight = parseFloat(computedStyle.lineHeight);
+            const fontSize = parseFloat(computedStyle.fontSize);
+            
+            // Create a temporary span to measure wrapped text height
+            const tempSpan = document.createElement('span');
+            tempSpan.style.cssText = `
+                position: absolute;
+                visibility: hidden;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                width: ${element.offsetWidth - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight)}px;
+                font-size: ${fontSize}px;
+                font-family: ${computedStyle.fontFamily};
+                line-height: ${lineHeight}px;
+            `;
+            document.body.appendChild(tempSpan);
+            
+            let cumulativeHeight = paddingTop;
+            const separatorPositions = [];
+            const lineColor = element === document.activeElement || element.closest('.excel-wrapper:focus-within') ? '#e0e8f5' : '#e8e8e8';
+            
+            lines.forEach((line, index) => {
+                tempSpan.textContent = line || ' '; // Use space for empty lines
+                const measuredHeight = tempSpan.offsetHeight;
+                cumulativeHeight += measuredHeight || lineHeight;
+                if (index > 0) {
+                    separatorPositions.push(cumulativeHeight);
+                }
+            });
+            
+            document.body.removeChild(tempSpan);
+            
+            // Create gradient stops for row separators
+            if (separatorPositions.length === 0) {
+                element.style.backgroundImage = 'none';
+                return;
+            }
+            
+            const totalHeight = cumulativeHeight + parseFloat(computedStyle.paddingBottom);
+            const gradientStops = separatorPositions.map((pos, index) => {
+                const percent = Math.min((pos / totalHeight) * 100, 99.9);
+                const thickness = 1;
+                return `${lineColor} ${percent - 0.05}%, ${lineColor} ${percent + 0.05}%, transparent ${percent + 0.05}%`;
+            }).join(', ');
+            
+            element.style.backgroundImage = `linear-gradient(to bottom, transparent 0%, ${gradientStops})`;
+        }
+
         function updateRowNumbers(elementId, rowNumbersId, isTextarea = true) {
             const element = document.getElementById(elementId);
             const rowNumbers = document.getElementById(rowNumbersId);
@@ -199,18 +261,65 @@
             
             const text = isTextarea ? element.value : element.textContent;
             const lines = text.split('\n');
-            const maxLines = Math.max(lines.length, 20); // Show at least 20 rows
+            const computedStyle = window.getComputedStyle(element);
+            const paddingTop = parseFloat(computedStyle.paddingTop);
+            const lineHeight = parseFloat(computedStyle.lineHeight);
+            const fontSize = parseFloat(computedStyle.fontSize);
             
-            let numbersHtml = '';
-            for (let i = 1; i <= maxLines; i++) {
-                numbersHtml += i + '<br>';
+            // Create a temporary span to measure wrapped text height
+            const tempSpan = document.createElement('span');
+            tempSpan.style.cssText = `
+                position: absolute;
+                visibility: hidden;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                width: ${element.offsetWidth - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight)}px;
+                font-size: ${fontSize}px;
+                font-family: ${computedStyle.fontFamily};
+                line-height: ${lineHeight}px;
+            `;
+            document.body.appendChild(tempSpan);
+            
+            // Measure each row's height
+            const rowHeights = [];
+            lines.forEach((line) => {
+                tempSpan.textContent = line || ' '; // Use space for empty lines
+                const measuredHeight = tempSpan.offsetHeight;
+                rowHeights.push(Math.max(measuredHeight, lineHeight));
+            });
+            
+            // If no content, show at least 20 rows with default height
+            if (rowHeights.length === 0) {
+                for (let i = 0; i < 20; i++) {
+                    rowHeights.push(lineHeight);
+                }
             }
+            
+            document.body.removeChild(tempSpan);
+            
+            // Create row numbers with matching heights
+            // Account for padding alignment
+            const rowNumbersPadding = parseFloat(computedStyle.paddingTop);
+            let numbersHtml = '';
+            rowHeights.forEach((height, index) => {
+                const rowNumber = index + 1;
+                // First row should account for top padding alignment
+                const divHeight = height;
+                numbersHtml += `<div style="height: ${divHeight}px; min-height: ${divHeight}px; display: flex; align-items: flex-start; justify-content: flex-end; padding-right: 0.25rem;">${rowNumber}</div>`;
+            });
+            
             rowNumbers.innerHTML = numbersHtml;
             
             // Sync scroll
-            element.addEventListener('scroll', () => {
+            const syncScroll = () => {
                 rowNumbers.scrollTop = element.scrollTop;
-            });
+            };
+            element.removeEventListener('scroll', syncScroll);
+            element.addEventListener('scroll', syncScroll);
+            
+            // Update row separators
+            updateRowSeparators(elementId, isTextarea);
         }
 
         function updateStats() {
@@ -218,13 +327,44 @@
             const lines = text.split('\n').filter(line => line.trim() !== '');
             document.getElementById('rowCount').textContent = lines.length;
             document.getElementById('charCount').textContent = text.length;
-            updateRowNumbers('sourceText', 'sourceRowNumbers');
+            updateRowNumbers('sourceText', 'sourceRowNumbers', true);
+            
+            // Debounce row separator updates
+            clearTimeout(window.separatorUpdateTimeout);
+            window.separatorUpdateTimeout = setTimeout(() => {
+                updateRowSeparators('sourceText', true);
+            }, 100);
         }
 
         // Initialize row numbers on page load
         document.addEventListener('DOMContentLoaded', () => {
             updateRowNumbers('sourceText', 'sourceRowNumbers', true);
             updateRowNumbers('translatedText', 'outputRowNumbers', false);
+            
+            // Update separators on focus/blur
+            const sourceText = document.getElementById('sourceText');
+            const translatedText = document.getElementById('translatedText');
+            
+            if (sourceText) {
+                sourceText.addEventListener('focus', () => updateRowSeparators('sourceText', true));
+                sourceText.addEventListener('blur', () => updateRowSeparators('sourceText', true));
+                sourceText.addEventListener('resize', () => updateRowSeparators('sourceText', true));
+            }
+            
+            if (translatedText) {
+                translatedText.addEventListener('focus', () => updateRowSeparators('translatedText', false));
+                translatedText.addEventListener('blur', () => updateRowSeparators('translatedText', false));
+            }
+            
+            // Update on window resize
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    updateRowSeparators('sourceText', true);
+                    updateRowSeparators('translatedText', false);
+                }, 250);
+            });
         });
 
         function showAlert(message, type) {
@@ -284,8 +424,11 @@
 
                 translatedDiv.textContent = data.translation;
                 copyBtn.disabled = false;
-                // Update row numbers for output
-                updateRowNumbers('translatedText', 'outputRowNumbers', false);
+                // Update row numbers and separators for output
+                setTimeout(() => {
+                    updateRowNumbers('translatedText', 'outputRowNumbers', false);
+                    updateRowSeparators('translatedText', false);
+                }, 50);
                 showAlert('✅ Successfully translated ' + lines.length + ' rows! Copy the results back to Excel.', 'success');
             } catch (error) {
                 showAlert('❌ Translation failed. Please try again or contact support.', 'error');
