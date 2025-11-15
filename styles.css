@@ -1,5 +1,5 @@
 /* ============================================
-   TranslateStack - DeepL-inspired Design
+   TranslateStack 
    Clean, Minimalist, Professional
    ============================================ */
 
@@ -294,62 +294,125 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(13, 126, 255, 0.1);
 }
 
-textarea {
-    width: 100%;
-    min-height: 300px;
-    padding: 1rem;
-    border: 1px solid var(--border-color);
+/* ===== Excel-like Wrapper ===== */
+.excel-wrapper {
+    position: relative;
+    display: flex;
+    border: 2px solid var(--border-color);
     border-radius: var(--radius-sm);
-    font-size: 0.95rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    resize: vertical;
-    line-height: 1.6;
-    transition: all var(--transition);
     background: var(--bg-white);
-    color: var(--text-primary);
+    overflow: hidden;
+    transition: all var(--transition);
 }
 
-textarea:hover {
+.excel-wrapper:hover {
     border-color: var(--primary-color);
 }
 
-textarea:focus {
-    outline: none;
+.excel-wrapper:focus-within {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(13, 126, 255, 0.1);
 }
 
+.row-numbers {
+    width: 40px;
+    min-width: 40px;
+    background: #f5f5f5;
+    border-right: 1px solid #e0e0e0;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.8rem;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    color: #666;
+    text-align: right;
+    line-height: 2;
+    user-select: none;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0;
+    font-size: 0.9rem;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    resize: vertical;
+    line-height: 2;
+    transition: all var(--transition);
+    background: var(--bg-white);
+    color: var(--text-primary);
+    background-image: 
+        repeating-linear-gradient(
+            transparent,
+            transparent calc(2em - 1px),
+            #e8e8e8 calc(2em - 1px),
+            #e8e8e8 2em
+        );
+    background-attachment: local;
+    outline: none;
+}
+
+textarea:focus {
+    background-image: 
+        repeating-linear-gradient(
+            transparent,
+            transparent calc(2em - 1px),
+            #e0e8f5 calc(2em - 1px),
+            #e0e8f5 2em
+        );
+    background-attachment: local;
+}
+
 textarea::placeholder {
     color: var(--text-muted);
+    opacity: 0.6;
 }
 
 /* ===== Output Area ===== */
 .output-area {
     width: 100%;
     min-height: 300px;
-    padding: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 0.95rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0;
+    font-size: 0.9rem;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     background: var(--bg-white);
     color: var(--text-primary);
     overflow-y: auto;
-    line-height: 1.6;
+    line-height: 2;
     white-space: pre-wrap;
     word-wrap: break-word;
     transition: all var(--transition);
+    background-image: 
+        repeating-linear-gradient(
+            transparent,
+            transparent calc(2em - 1px),
+            #e8e8e8 calc(2em - 1px),
+            #e8e8e8 2em
+        );
+    background-attachment: local;
+    outline: none;
 }
 
-.output-area:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(13, 126, 255, 0.1);
+.excel-wrapper:focus-within .output-area {
+    background-image: 
+        repeating-linear-gradient(
+            transparent,
+            transparent calc(2em - 1px),
+            #e0e8f5 calc(2em - 1px),
+            #e0e8f5 2em
+        );
+    background-attachment: local;
 }
 
 .output-placeholder {
     color: var(--text-muted);
     font-style: italic;
+    opacity: 0.6;
 }
 
 /* ===== Buttons ===== */
