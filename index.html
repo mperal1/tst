@@ -67,11 +67,14 @@
                     </select>
                     
                     <label for="sourceText">Paste your Excel column here (one row per line)</label>
-                    <textarea 
-                        id="sourceText" 
-                        placeholder="Product Name&#10;Customer Email&#10;Order Status&#10;Delivery Address&#10;..."
-                        oninput="updateStats()"
-                    ></textarea>
+                    <div class="excel-wrapper">
+                        <div class="row-numbers" id="sourceRowNumbers"></div>
+                        <textarea 
+                            id="sourceText" 
+                            placeholder="Product Name&#10;Customer Email&#10;Order Status&#10;Delivery Address&#10;..."
+                            oninput="updateStats()"
+                        ></textarea>
+                    </div>
                     
                     <div class="stats">
                         <div class="stat-item">
@@ -107,8 +110,11 @@
                     </select>
                     
                     <label>Ready to paste back into Excel</label>
-                    <div class="output-area" id="translatedText">
-                        <span class="output-placeholder">Your translated rows will appear here...</span>
+                    <div class="excel-wrapper">
+                        <div class="row-numbers" id="outputRowNumbers"></div>
+                        <div class="output-area" id="translatedText">
+                            <span class="output-placeholder">Your translated rows will appear here...</span>
+                        </div>
                     </div>
                     
                     <div class="button-group">
@@ -186,12 +192,40 @@
     </div>
 
     <script>
+        function updateRowNumbers(elementId, rowNumbersId, isTextarea = true) {
+            const element = document.getElementById(elementId);
+            const rowNumbers = document.getElementById(rowNumbersId);
+            if (!element || !rowNumbers) return;
+            
+            const text = isTextarea ? element.value : element.textContent;
+            const lines = text.split('\n');
+            const maxLines = Math.max(lines.length, 20); // Show at least 20 rows
+            
+            let numbersHtml = '';
+            for (let i = 1; i <= maxLines; i++) {
+                numbersHtml += i + '<br>';
+            }
+            rowNumbers.innerHTML = numbersHtml;
+            
+            // Sync scroll
+            element.addEventListener('scroll', () => {
+                rowNumbers.scrollTop = element.scrollTop;
+            });
+        }
+
         function updateStats() {
             const text = document.getElementById('sourceText').value;
             const lines = text.split('\n').filter(line => line.trim() !== '');
             document.getElementById('rowCount').textContent = lines.length;
             document.getElementById('charCount').textContent = text.length;
+            updateRowNumbers('sourceText', 'sourceRowNumbers');
         }
+
+        // Initialize row numbers on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRowNumbers('sourceText', 'sourceRowNumbers', true);
+            updateRowNumbers('translatedText', 'outputRowNumbers', false);
+        });
 
         function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
@@ -250,6 +284,8 @@
 
                 translatedDiv.textContent = data.translation;
                 copyBtn.disabled = false;
+                // Update row numbers for output
+                updateRowNumbers('translatedText', 'outputRowNumbers', false);
                 showAlert('✅ Successfully translated ' + lines.length + ' rows! Copy the results back to Excel.', 'success');
             } catch (error) {
                 showAlert('❌ Translation failed. Please try again or contact support.', 'error');
