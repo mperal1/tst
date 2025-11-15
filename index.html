@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TranslateStack - Bulk translation tool for Excel columns. Translate 10, 100, or more rows at once instead of one by one.">
+    <meta name="keywords" content="bulk translation, excel translation, batch translate, column translation">
+    <title>TranslateStack - Bulk Excel Translation Tool</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .value-prop {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .value-prop p {
+            color: #374151;
+            font-size: 1rem;
+        }
+
+        main {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .instructions h2 {
+            color: #92400e;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .instructions ol {
+            margin-left: 1.5rem;
+            color: #78350f;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .translation-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .translation-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-group {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e5e7eb;
+        }
+
+        .input-group h3 {
+            color: #374151;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .output-area {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            background: white;
+            overflow-y: auto;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .output-placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            min-width: 200px;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 2px solid #d1d5db;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .pricing-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1rem;
+            color: white;
+            text-align: center;
+        }
+
+        .pricing-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .pricing-card.featured {
+            background: white;
+            color: #1f2937;
+            transform: scale(1.05);
+            border: none;
+        }
+
+        .plan-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .pricing-card.featured .price {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-list {
+            list-style: none;
+            text-align: left;
+            margin: 1.5rem 0;
+        }
+
+        .features-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .features-list li:before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            color: white;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <div>
+                    <h1>TranslateStack</h1>
+                    <p class="tagline">Bulk Excel Translation Made Simple</p>
+                </div>
+            </div>
+            <div class="value-prop">
+                <p><strong>Stop translating row by row!</strong> Copy your Excel column and translate 10, 100, or even 1000 rows at once. Save hours of repetitive work.</p>
+            </div>
+        </header>
+
+        <main>
+            <div class="instructions">
+                <h2>📋 How to Use TranslateStack</h2>
+                <ol>
+                    <li><strong>Copy your Excel column:</strong> Select the cells in Excel, press Ctrl+C (Cmd+C on Mac)</li>
+                    <li><strong>Paste below:</strong> Each row will appear on a new line</li>
+                    <li><strong>Select languages:</strong> Choose source and target language</li>
+                    <li><strong>Translate in bulk:</strong> Click translate and get all rows translated at once</li>
+                    <li><strong>Copy back to Excel:</strong> Select all translated text and paste back into your spreadsheet</li>
+                </ol>
+            </div>
+
+            <div class="translation-section">
+                <div class="input-group">
+                    <h3>📥 Source Text</h3>
+                    <label for="sourceLang">Source Language</label>
+                    <select id="sourceLang">
+                        <option value="auto">Auto-detect</option>
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ru">Russian</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ko">Korean</option>
+                        <option value="zh">Chinese (Simplified)</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                        <option value="nl">Dutch</option>
+                        <option value="pl">Polish</option>
+                        <option value="tr">Turkish</option>
+                    </select>
+                    
+                    <label for="sourceText">Paste your Excel column here (one row per line)</label>
+                    <textarea 
+                        id="sourceText" 
+                        placeholder="Product Name&#10;Customer Email&#10;Order Status&#10;Delivery Address&#10;..."
+                        oninput="updateStats()"
+                    ></textarea>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Rows</span>
+                            <span class="stat-value" id="rowCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Characters</span>
+                            <span class="stat-value" id="charCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <h3>📤 Translated Text</h3>
+                    <label for="targetLang">Target Language</label>
+                    <select id="targetLang">
+                        <option value="en">English</option>
+                        <option value="es" selected>Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ru">Russian</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ko">Korean</option>
+                        <option value="zh">Chinese (Simplified)</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                        <option value="nl">Dutch</option>
+                        <option value="pl">Polish</option>
+                        <option value="tr">Turkish</option>
+                    </select>
+                    
+                    <label>Ready to paste back into Excel</label>
+                    <div class="output-area" id="translatedText">
+                        <span class="output-placeholder">Your translated rows will appear here...</span>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="copyToClipboard()" id="copyBtn" disabled>
+                            📋 Copy All
+                        </button>
+                        <button class="btn-secondary" onclick="clearAll()">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="translateBulk()" id="translateBtn">
+                    <span id="btnText">🚀 Translate All Rows</span>
+                </button>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div class="pricing-section">
+                <h2>💎 Upgrade for Unlimited Translations</h2>
+                <p>Currently in beta - Free version allows 10 translations per day</p>
+                
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="plan-name">Free</div>
+                        <div class="price">$0<span style="font-size: 1rem;">/mo</span></div>
+                        <ul class="features-list">
+                            <li>10 translations/day</li>
+                            <li>Up to 100 rows per batch</li>
+                            <li>15 languages</li>
+                            <li>Basic support</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="pricing-card featured">
+                        <div class="plan-name">Pro</div>
+                        <div class="price">$9.99<span style="font-size: 1rem;">/mo</span></div>
+                        <ul class="features-list">
+                            <li>Unlimited translations</li>
+                            <li>Up to 10,000 rows per batch</li>
+                            <li>50+ languages</li>
+                            <li>Priority speed</li>
+                            <li>Excel file upload</li>
+                            <li>API access</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <button class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                            Coming Soon
+                        </button>
+                    </div>
+                    
+                    <div class="pricing-card">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="price">Custom</div>
+                        <ul class="features-list">
+                            <li>Everything in Pro</li>
+                            <li>Unlimited rows</li>
+                            <li>Custom integrations</li>
+                            <li>Dedicated support</li>
+                            <li>SLA guarantee</li>
+                            <li>Team accounts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 TranslateStack. Built with ❤️ for Excel users who hate repetitive work.</p>
+            <p style="margin-top: 0.5rem; opacity: 0.8;">Powered by AI | <a href="mailto:hello@translatestack.tech">Contact</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function updateStats() {
+            const text = document.getElementById('sourceText').value;
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            document.getElementById('rowCount').textContent = lines.length;
+            document.getElementById('charCount').textContent = text.length;
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        async function translateBulk() {
+            const sourceText = document.getElementById('sourceText').value.trim();
+            const sourceLang = document.getElementById('sourceLang').value;
+            const targetLang = document.getElementById('targetLang').value;
+            const translateBtn = document.getElementById('translateBtn');
+            const btnText = document.getElementById('btnText');
+            const translatedDiv = document.getElementById('translatedText');
+            const copyBtn = document.getElementById('copyBtn');
+
+            if (!sourceText) {
+                showAlert('⚠️ Please paste some text to translate', 'error');
+                return;
+            }
+
+            const lines = sourceText.split('\n').filter(line => line.trim() !== '');
+            
+            if (lines.length === 0) {
+                showAlert('⚠️ No valid rows found', 'error');
+                return;
+            }
+
+            // Disable button and show loading
+            translateBtn.disabled = true;
+            btnText.innerHTML = '<span class="spinner"></span> Translating ' + lines.length + ' rows...';
+            translatedDiv.innerHTML = '<span class="output-placeholder">Processing...</span>';
+            copyBtn.disabled = true;
+
+            try {
+                // Call our secure Netlify function instead of Anthropic directly
+                const response = await fetch('/.netlify/functions/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sourceText: sourceText,
+                        sourceLang: sourceLang,
+                        targetLang: targetLang
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Translation failed');
+                }
+
+                translatedDiv.textContent = data.translation;
+                copyBtn.disabled = false;
+                showAlert('✅ Successfully translated ' + lines.length + ' rows! Copy the results back to Excel.', 'success');
+            } catch (error) {
+                showAlert('❌ Translation failed. Please try again or contact support.', 'error');
+                translatedDiv.innerHTML = '<span class="output-placeholder">Translation failed...</span>';
+                console.error('Translation error:', error);
+            } finally {
+                translateBtn.disabled = false;
+                btnText.innerHTML = '🚀 Translate All Rows';
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('translatedText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = document.getElementById('copyBtn');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+                showAlert('✅ Copied to clipboard! You can now paste into Excel.', 'success');
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('sourceText').value = '';
+            document.getElementById('translatedText').innerHTML = '<span class="output-placeholder">Your translated rows will appear here...</span>';
+            document.getElementById('copyBtn').disabled = true;
+            updateStats();
+        }
+
+        // Allow Ctrl+Enter to translate
+        document.getElementById('sourceText').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                translateBulk();
+            }
+        });
+    </script>
+</body>
+</html>
